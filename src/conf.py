@@ -6,6 +6,10 @@ import pathlib
 from string import Template
 from sphinx.locale import _
 
+# Set default encoding to UTF-8
+import locale
+locale.getpreferredencoding = lambda: 'UTF-8'
+
 try:
     # monkey patch the list of nodes to be treated as literal nodes during translation
     # workaround for https://github.com/sphinx-doc/sphinx/issues/7968
@@ -25,10 +29,19 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.rsvgconverter",
-    "sphinx.ext.imgmath",
     "admonition_templates",
     "subfig",
 ]
+
+# MathJax configuration
+mathjax_config = {
+    'TeX': {
+        'Macros': {
+            'xor': '\\oplus',
+            'Downarrow': '\\Downarrow',
+        }
+    }
+}
 
 # number figures
 numfig = True
@@ -104,38 +117,28 @@ def read_latex_template(name: str) -> str:
 imgmath_latex_preamble = read_latex_source("imgmath")
 imgmath_image_format = "svg"
 imgmath_font_size = 16
+imgmath_use_preview = True
+imgmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']
+imgmath_latex = 'xelatex'  # Use XeLaTeX for better Unicode support
 
 # whether to show the page number after references
 latex_show_pagerefs = True
 latex_engine = "xelatex"
 
-# what documents to build
-latex_documents = [
-    (
-        # master document
-        master_doc,
-        # target file name
-        "crypto101.tex",
-        # title
-        project,
-        # author
-        author,
-        # document class
-        "memoir",
-    )
-]
-
-# top level titles are parts
-latex_toplevel_sectioning = "part"
-
-latex_docclass = {"manual": "memoir"}
+# Chinese language support
 latex_elements = {
-    "printindex": "",
-    "pointsize": "11pt",
-    "papersize": "ebook",
-    "fncychap": "",
-    "extraclassoptions": "table,dvipsnames,oneside,openany",
-    "sphinxsetup": ",".join(
+    'preamble': r'''
+\usepackage{xeCJK}
+\setCJKmainfont{Noto Serif CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+''',
+    'printindex': "",
+    'pointsize': '11pt',
+    'papersize': 'ebook',
+    'fncychap': '',
+    'extraclassoptions': 'table,dvipsnames,oneside,openany',
+    'sphinxsetup': ','.join(
         (
             # titles should be black
             "TitleColor={rgb}{0.0,0.0,0.0}",
@@ -147,7 +150,7 @@ latex_elements = {
             "HeaderFamily={\\bfseries}",
         )
     ),
-    "fontpkg": r"""
+    'fontpkg': r"""
 \usepackage{fontspec}
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Source Serif Pro}
@@ -156,12 +159,17 @@ latex_elements = {
 \usepackage{setspace}
 \usepackage{csquotes}
     """,
-    "passoptionstopackages": """
+    'passoptionstopackages': """
 \PassOptionsToPackage{dvipsnames,table}{xcolor}
     """,
-    "preamble": read_latex_template("preamble"),
-    "hyperref": read_latex_template("hyperref"),
-    "maketitle": read_latex_template("maketitle"),
+    'preamble': read_latex_template("preamble"),
+    'hyperref': read_latex_template("hyperref"),
+    'maketitle': read_latex_template("maketitle"),
 }
 
 latex_additional_files = ["./Illustrations/CC/CC-BY-NC.pdf"]
+
+# top level titles are parts
+latex_toplevel_sectioning = "part"
+
+latex_docclass = {"manual": "memoir"}

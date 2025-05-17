@@ -20,7 +20,10 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     python3-sphinxcontrib.bibtex \
     python3-sphinxcontrib.svg2pdfconverter \
     ghostscript \
-    xindy
+    xindy \
+    texlive-lang-chinese \
+    texlive-fonts-recommended \
+    fonts-noto-cjk
 
 RUN set -e; \
     apt-get install -y wget; \
